@@ -72,13 +72,16 @@
                                         <p>{!! ($product_detail->summary) !!}</p>
 </div>
                                         <h4 class="prduct-prce mb-4">{{ $product_detail->getCurrencySymbol() }} {{ Helper::getProductPriceByCurrency(session('currency'), $product_detail) }}</h4>
+  @php
+$trainingApplicable = str_contains(str_replace(['-','_'],'',strtolower($product_detail->slug ?? '')), 'gamingfusion') || str_contains(str_replace(['-','_',' '],'',strtolower($product_detail->title ?? '')), 'gamingfusion');
+@endphp
+@if($trainingApplicable)
   <h3 class="" style="display:flex;">
         <input class="form-check-input" type="checkbox" id="addon" style="width:28px;margin-right:15px;margin-top: 2px;">
         {{ __('common.optional_training') }} &nbsp;&nbsp;<a href="#optn_tranadd" ><span > {{ __('common.read_more') }}</span></a>
-                                 
-                     
-                     </h3>       
-  <div class="gt-shop-details-content mb-4 text-center" style="padding: 10px 40px;">                      
+  </h3>
+@endif
+  <div class="gt-shop-details-content mb-4 text-center training-controls" style="padding: 10px 40px;{{ $trainingApplicable ? "" : "display:none;" }}">                      
                                 
                                 
                             <div class="slider-container mb-4">
@@ -256,7 +259,8 @@
                                             </ul>
                                         </div>
                                     </div>
-                                     <div id="optn_tranadd"> 
+                                     @if($trainingApplicable)
+  <div id="optn_tranadd"> 
        @if(session('app_locale') == 'ja') 
   <div class="gt-shop-details-content training-addon-section">
   <h3>私たちはあなたのアカウントを後押ししながら、見て、学び、改善</h3>
@@ -364,7 +368,8 @@
                                        
 @endif                                         
 
-  </div>   
+  </div>
+  @endif   
                                 </div>
                                 
                             </div>
@@ -393,13 +398,13 @@
       //const productPrice = 12;
  const productPrice =   '<?php
                                     if(session('currency') == 'HKD') {
-                                        print 257;
+                                        print 20;
                                     }
                             elseif(session('currency') == 'JPY') {
-                                        echo 5000;
+                                        echo 20;
                                     }
                             else {
-                                       echo 35;
+                                       echo 20;
                                     }
                                ?>';
       function updateTooltip() {
@@ -447,13 +452,16 @@
                 });
             });
         });
-        $('.we').hide(); 
+        $('.we').hide();
         $('#addon').change(function() {
-    if ($(this).is(':checked')) {
-      $('.we').slideDown(); 
-    } else {
-      $('.we').slideUp();
-    }
-  });
+          if ($(this).is(':checked')) {
+            $('.we').slideDown();
+          } else {
+            slider.value = 0;
+            quantityInput.value = 0;
+            updateTooltip();
+            $('.we').slideUp();
+          }
+        });
     </script>
 @endpush

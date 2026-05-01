@@ -450,7 +450,7 @@ $m=Helper::getProductPriceByCurrency(session('currency'), $cart->product);
                             @endphp                              
                                     <tr>
                                         <td>{{ $cart->product['title'] }}
- @if($a>0) 
+ @if($hours>0) 
                                    
                                     <br><span class="text-white">+ {{$hours}} {{ __('common.hours') }} &nbsp;  
             ( {{$hours}} X {{ Helper::getCurrencySymbol(session('currency')) }}{{number_format($perhour, session('currency')=='JPY' ? 0 : 2)}} )  </span>

@@ -43,25 +43,10 @@
    @php $photo = explode(',', $cart->product['photo']);
 $product_detail= App\Models\Product::getProductBySlug($cart->product->slug); 
                     
-$m=Helper::getProductPriceByCurrency(session('currency'), $cart->product);
-                                
-                    if(session('currency') == 'HKD') {
-        $a=$cart['price']-$product_detail->price_hk;
-        $hours=$a/257; $basic=$product_detail->price_hk; 
-        $perhour=257;                        
-                                    }
-                                    elseif(session('currency') == 'JPY') {
-        $a=$cart['price']-$product_detail->price_jp;
-            $hours=$a/5000; $basic=$product_detail->price_jp;
-            $perhour=5000;                    
-                                    }
-                                   elseif(session('currency') == 'USD') {
-        $a=$cart['price']-$product_detail->price;
-            $hours=$a/35; $basic=$product_detail->price; 
-            $perhour=35;                    
-                                    }                             
-                         
-                        
+$hours = (int) ($cart->hours ?? 0);
+$basic = $cart['price'] - ($hours * 20);
+$perhour = 20;
+
                         @endphp                             
                                 
                                         <tr>
@@ -72,7 +57,7 @@ $m=Helper::getProductPriceByCurrency(session('currency'), $cart->product);
                                                 </div>
                                                 <div class="p-content">
                                                     <a href="#">{{ $cart->product['title'] }}</a>
-@if($a>0)                   
+@if($hours>0)                   
     <div class="car-hours-group"><h5>{{$hours}} {{ __('common.hours') }}</h5> <a href="{{ route('trainingdelete', $cart->id) }}"><i class="icofont-close"></i></a>  
             <p class="text-white mb-0">{{ Helper::getCurrencySymbol(session('currency')) }} {{number_format($basic, session('currency')=='JPY' ? 0 : 2)}} + ( {{$hours}} X {{ Helper::getCurrencySymbol(session('currency')) }}  {{number_format($perhour, session('currency')=='JPY' ? 0 : 2)}} )</p>  </div>
 @endif                                                      
