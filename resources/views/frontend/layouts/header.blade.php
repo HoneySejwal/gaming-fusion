@@ -245,7 +245,7 @@ $m=Helper::getProductPriceByCurrency(session('currency'), $cart->product);
                                 <img src="{{ url($photo[0]) }}" class="img-fluid cart-img me-3" alt="game-img">
                                 <div class="cart-info me-4">
                                     <a href="{{ route('product-detail', $cart->product->slug) }}">{{ $cart->product['title'] }}</a>
-                                    @if($a>0)  
+                                    @if($hours>0)  
                                     <p class="mb-0 text-white" style="font-size: unset;"> <span>{{ Helper::getCurrencySymbol(session('currency')) }} {{number_format($basic, session('currency')=='JPY' ? 0 : 2)}} +</span></p>
                                    
                                    

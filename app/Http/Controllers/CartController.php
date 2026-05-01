@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Session;
 use Helper;
 class CartController extends Controller
 {
+    private const TRAINING_RATE = 20;
     protected $product=null;
     public function __construct(Product $product){
         $this->product=$product;
@@ -69,6 +70,7 @@ class CartController extends Controller
         $request->validate([
             'slug'      =>  'required',
             'quant'      =>  'required',
+            'hours' => 'nullable|integer|min:0|max:10',
         ]);
         // dd($request->quant[1]);
  //return $request;
@@ -80,17 +82,13 @@ class CartController extends Controller
         //$product = Product::where('slug', $request->slug)->first();
         $product = Product::getProductBySlug($request->slug);
         
-        if($request->hours>0)
-        {
-            $true_price = $product->price+35*$request->hours;
-            $true_price_jp = $product->price_jp+5000*$request->hours;
-            $true_price_hk = $product->price_hk+257*$request->hours;
-         }
-        else {
-            $true_price = $product->price;
-            $true_price_jp = $product->price_jp;
-            $true_price_hk = $product->price_hk;
-         }
+        $hours = max(0, min(10, (int) $request->input('hours', 0)));
+        if (! $this->supportsTrainingAddon($product)) {
+            $hours = 0;
+        }
+        $true_price = $product->price + (self::TRAINING_RATE * $hours);
+        $true_price_jp = $product->price_jp + (self::TRAINING_RATE * $hours);
+        $true_price_hk = $product->price_hk + (self::TRAINING_RATE * $hours);
         
  //return $true_price;
         
@@ -140,6 +138,7 @@ else {
             $cart->price = $true_price;
             $cart->price_jp = $true_price_jp;
             $cart->price_hk = $true_price_hk;
+            $cart->hours = $hours;
             $cart->quantity = $request->quant[1];
             $cart->amount = $cart->price * $cart->quantity;
             $cart->amount_jp = $cart->price_jp * $cart->quantity;
@@ -213,6 +212,9 @@ else {
     }
 public function trainingdelete(Request $request){
         $cart = Cart::find($request->id);
+        if (!$cart) {
+            return back()->with('error', 'Cart item not found.');
+        }
         //return $cart;
         $product_detail=Product::find($cart->product_id);
         $product_detail= Product::getProductBySlug($product_detail->slug); 
@@ -224,9 +226,10 @@ public function trainingdelete(Request $request){
             'price_jp' => $product_detail->price_jp,
             'price' => $product_detail->price,
             'price_hk' => $product_detail->price_hk,
-            'amount' => $product_detail->price,
-            'amount_jp' => $product_detail->price_jp,
-            'amount_hk' => $product_detail->price_hk
+            'hours' => 0,
+            'amount' => $product_detail->price * $cart->quantity,
+            'amount_jp' => $product_detail->price_jp * $cart->quantity,
+            'amount_hk' => $product_detail->price_hk * $cart->quantity
         ]);
                     
 
@@ -237,6 +240,14 @@ public function trainingdelete(Request $request){
         
        
           
+    }
+
+    private function supportsTrainingAddon(Product $product): bool
+    {
+        $slug = Str::of((string) $product->slug)->lower()->replace('-', '')->replace('_', '')->value();
+        $title = Str::of((string) $product->title)->lower()->replace('-', '')->replace('_', '')->replace(' ', '')->value();
+
+        return str_contains($slug, 'gamingfusion') || str_contains($title, 'gamingfusion');
     }
     // public function addToCart(Request $request){
     //     // return $request->all();
